@@ -18,7 +18,6 @@ red_led.off()
 pir = MotionSensor(4)
 CAPTURI_PATH = '/home/antoniu/mu_code/Capturi/'
 camera = PiCamera()
-# filename = CAPTURI_PATH + datetime.datetime.now().isoformat() + '.h264'
 
 titlu = 'Alerta de securitate'
 text = """\
@@ -51,7 +50,6 @@ def mail(filepath, filename):
     message["To"] = RECIEVER_EMAIL
     message["Subject"] = titlu
 
-    # start = time.time()
     message.attach(MIMEText(text, 'plain'))
     attachment = open(filepath, "rb")
 
@@ -63,15 +61,8 @@ def mail(filepath, filename):
 
     message.attach(mimeBase)
     text1 = message.as_string()
-    # print(f'Video base64 encoding took: {time.time() - start}s')
-
-    # start = time.time()
     session.login(USERNAME, PASSWORD)
-    # print(f'Login took: {time.time() - start}s')
-
-    # start = time.time()
     session.sendmail(USERNAME, RECIEVER_EMAIL, text1)
-    # print(f'Sending mail took: {time.time() - start}s')
     session.quit()
     print("Email trimis")
 
@@ -79,22 +70,13 @@ while True:
     pir.wait_for_motion()
     print("Miscare detectata")
     red_led.on()
-    # camera.capture('/home/antoniu/mu_code/Capturi/ + datetime.datetime.now().isoformat() + '.png')
-    # camera.start_recording('/home/antoniu/mu_code/Capturi/Intrus' + datetime.datetime.now().isoformat() + '.h264')
     filename = 'Intrus' + datetime.datetime.now().strftime('%d-%m-%yT%H-%M-%S') + '.h264'
-    # filename = 'testwidowslegal.h264'
     filepath = CAPTURI_PATH + filename
     video(filepath)
     command = "ffmpeg -framerate 24 -v 0 -i {} -c copy {}.mp4".format(filepath, os.path.join(CAPTURI_PATH, filename.split('.')[0]))
-    # start = time.time()
     subprocess.run(command.split(' '))
     subprocess.run(['rm', filepath])
-    # print(f'Converting video and removing the old one took: {time.time() - start}s')
-    # start = time.time()
     mail(os.path.join(CAPTURI_PATH, filename.split('.')[0]) + '.mp4', filename.split('.')[0] + '.mp4')
-    # print(f'Mailing the video took: {time.time() - start}s')
-    # pir.wait_for_no_motion()
     red_led.off()
-
     print("Miscare oprita")
-    # camera.close()
+    
